@@ -59,5 +59,3 @@ def tests():
         pdates(inputs[i], "./output/pdate"  + mods[i] + ".txt")
         prices(inputs[i], "./output/prices" + mods[i] + ".txt")
         ads(inputs[i], "./output/ads" + mods[i] + ".txt")
-
-tests()
