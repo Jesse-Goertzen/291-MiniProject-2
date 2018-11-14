@@ -52,25 +52,30 @@ def ads(path, output="./output/ads.txt"):
         f.writelines(lines)
         f.truncate()
 
-def termstxt(path):
-    pathx = "10.txt"
-    with open(pathx, 'r') as f:
-        with open("outputerms.txt", 'w') as o:
+def terms(path, output="./output/terms.txt"):
+    with open(path, 'r') as f:
+        with open(output, 'w') as o:
             for line in f:
                 if re.search("<ad>(.*)</ad>", line) is not None:
                     term1 = re.search("<ti>(.*)</ti>", line).group(1).lower()
                     term2 = re.search("<desc>(.*)</desc>", line).group(1).lower()
                     aid = re.search("<aid>(.*)</aid>", line).group(1)
+                    term1 = re.sub("&.*?;", "", term1)
+                    term2 = re.sub("&.*?;", "", term2)
+                    term1 = re.sub("[^0-9a-zA-Z-_]", " ", term1)
+                    term2 = re.sub("[^0-9a-zA-Z-_]", " ", term2)
                     term1 = term1.split()
                     term2 = term2.split()
                     for term in term1:
-                        term = re.search("([0-9a-zA-Z-_]*)", term).group(1)
-                        if term is not None and len(term) > 2:
-                            o.write(term+":"+aid+'\n')
+                        term = re.search("([0-9a-zA-Z-_]+)", term)
+                        if term is not None:
+                            if len(term.group(1)) > 2:
+                                o.write(term.group(1) + ":" + aid + '\n')
                     for term in term2:
-                        term = re.search("([0-9a-zA-Z-_]*)", term).group(1)
-                        if term is not None and len(term) > 2:
-                            o.write(term+":"+aid+'\n')
+                        term = re.search("([0-9a-zA-Z-_]+)", term)
+                        if term is not None:
+                            if len(term.group(1)) > 2:
+                                o.write(term.group(1) + ":" + aid + '\n')
 
 def tests():
     inputs = ["./10records.txt", "./1000records.txt"]
@@ -79,3 +84,6 @@ def tests():
         pdates(inputs[i], "./output/pdate"  + mods[i] + ".txt")
         prices(inputs[i], "./output/prices" + mods[i] + ".txt")
         ads(inputs[i], "./output/ads" + mods[i] + ".txt")
+        terms(inputs[i], "./output/terms" + mods[i] + ".txt")
+
+tests()
