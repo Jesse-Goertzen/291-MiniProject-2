@@ -12,6 +12,11 @@ def pdates(path, output="./output/pdate.txt"):
                     loc  = re.search("<loc>(.*)</loc>", l).group(1).lower()
                     d.write("%s:%s,%s,%s\n" % (date, aid, cat, loc))
 
+    with open(output, 'r+') as f:
+        lines = sorted(set(f.readlines()))
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
 
 # p:a,c,l
 def prices(path, output="./output/prices.txt"):
@@ -24,6 +29,12 @@ def prices(path, output="./output/prices.txt"):
                     cat   = re.search("<cat>(.*)</cat>", l).group(1)
                     loc   = re.search("<loc>(.*)</loc>", l).group(1)
                     d.write("%s:%s,%s,%s\n" % (price, aid, cat, loc))
+    
+    with open(output, 'r+') as f:
+        lines = sorted(set(f.readlines()))
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
 
 
 # a:ad
@@ -35,6 +46,11 @@ def ads(path, output="./output/ads.txt"):
                     a = re.search("<aid>(.*)</aid>", l).group(1)
                     d.write("%s:%s" % (a, l))
 
+    with open(output, 'r+') as f:
+        lines = sorted(set(f.readlines()))
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
 
 def tests():
     inputs = ["./10records.txt", "./1000records.txt"]
