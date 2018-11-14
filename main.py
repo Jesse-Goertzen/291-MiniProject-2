@@ -57,17 +57,9 @@ def terms(path, output="./output/terms.txt"):
         with open(output, 'w') as o:
             for line in f:
                 if re.search("<ad>(.*)</ad>", line) is not None:
-                    term1 = re.search("<ti>(.*)</ti>", line).group(1).lower()
-                    term2 = re.search("<desc>(.*)</desc>", line).group(1).lower()
                     aid = re.search("<aid>(.*)</aid>", line).group(1)
-                    term1 = re.sub("&amp;", " ", term1)
-                    term2 = re.sub("&amp;", " ", term2)
-                    term1 = re.sub("&.*?;", "", term1)
-                    term2 = re.sub("&.*?;", "", term2)
-                    term1 = re.sub("[^0-9a-zA-Z-_]", " ", term1)
-                    term2 = re.sub("[^0-9a-zA-Z-_]", " ", term2)
-                    term1 = term1.split()
-                    term2 = term2.split()
+                    term1 = re.sub("[^0-9a-zA-Z-_]", " ", re.sub("&.*?;", "", re.sub("&amp;", " ", re.search("<ti>(.*)</ti>", line).group(1).lower()))).split()
+                    term2 = re.sub("[^0-9a-zA-Z-_]", " ", re.sub("&.*?;", "", re.sub("&amp;", " ", re.search("<desc>(.*)</desc>", line).group(1).lower()))).split()
                     for term in term1:
                         term = re.search("([0-9a-zA-Z-_]+)", term)
                         if term is not None:
