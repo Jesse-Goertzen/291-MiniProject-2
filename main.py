@@ -52,6 +52,26 @@ def ads(path, output="./output/ads.txt"):
         f.writelines(lines)
         f.truncate()
 
+def termstxt(path):
+    pathx = "10.txt"
+    with open(pathx, 'r') as f:
+        with open("outputerms.txt", 'w') as o:
+            for line in f:
+                if re.search("<ad>(.*)</ad>", line) is not None:
+                    term1 = re.search("<ti>(.*)</ti>", line).group(1).lower()
+                    term2 = re.search("<desc>(.*)</desc>", line).group(1).lower()
+                    aid = re.search("<aid>(.*)</aid>", line).group(1)
+                    term1 = term1.split()
+                    term2 = term2.split()
+                    for term in term1:
+                        term = re.search("([0-9a-zA-Z-_]*)", term).group(1)
+                        if term is not None and len(term) > 2:
+                            o.write(term+":"+aid+'\n')
+                    for term in term2:
+                        term = re.search("([0-9a-zA-Z-_]*)", term).group(1)
+                        if term is not None and len(term) > 2:
+                            o.write(term+":"+aid+'\n')
+
 def tests():
     inputs = ["./10records.txt", "./1000records.txt"]
     mods = ["10", "1000"]
