@@ -1,4 +1,5 @@
-import bsddb3
+from bsddb3 import db
+import re
 
 # Dunno if we'll need this but I had the idea and wanted to make it just incase
 from time import sleep
@@ -15,4 +16,14 @@ def boolInput(string, clear=True):
         else:
             print("Invalid selection, try again.")
             sleep(0.75)
+
+def adsHash(name="./indexes/ad.idx"):
+    database = db.DB()
+    database.open(name, None, db.DB_HASH, db.DB_CREATE)
+    with open("./output/ads.txt", 'r') as f:
+        for l in f:
+            match = re.search("(\\d{10}):(.*)",l)
+            key, data = match.group(1).encode(), match.group(2)
+            database.put(key, data, db.DB_KEYFIRST)
+
 
