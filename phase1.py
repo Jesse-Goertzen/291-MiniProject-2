@@ -70,6 +70,12 @@ def terms(path, output="./output/terms.txt"):
                         if term is not None:
                             if len(term.group(1)) > 2:
                                 o.write(term.group(1) + ":" + aid + '\n')
+    with open(output, 'r+') as f:
+    lines = sorted(set(f.readlines()))
+    f.seek(0)
+    f.writelines(lines)
+    f.truncate()
+
 
 # Now we can simply do: {from phase1 import init} then call to create all files based on the path to whatever records we're using
 def init(path):
