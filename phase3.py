@@ -6,6 +6,7 @@ import Date
 
 class Parser():
     # returns: (operator {str}, date {date})
+    # Use findall and have operator and date in one group, then do another regex to create a tuple for each date query 
     def _dateQuery(self, string):
         match = re.search("date\s*(<|<=|>|>=|=)\s*(\d{4}/\d{2}/\d{2})", string)
         if match:
