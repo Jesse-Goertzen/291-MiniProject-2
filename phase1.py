@@ -71,6 +71,13 @@ def terms(path, output="./output/terms.txt"):
                             if len(term.group(1)) > 2:
                                 o.write(term.group(1) + ":" + aid + '\n')
 
+# Now we can simply do: {from phase1 import init} then call to create all files based on the path to whatever records we're using
+def init(path):
+    terms(path)
+    pdates(path)
+    prices(path)
+    ads(path)
+
 def tests():
     inputs = ["./10records.txt", "./1000records.txt"]
     mods = ["10", "1000"]
@@ -80,4 +87,3 @@ def tests():
         ads(inputs[i], "./output/ads" + mods[i] + ".txt")
         terms(inputs[i], "./output/terms" + mods[i] + ".txt")
 
-tests()
