@@ -105,3 +105,6 @@ venv.bak/
 
 #projectstuff
 output/
+
+#vscodestuff
+mp2.code-workspace
