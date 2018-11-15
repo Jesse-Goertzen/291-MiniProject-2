@@ -46,3 +46,13 @@ def pricesBtree(name="./indexes/pr.idx"):
             key, data = match.group(1).encode(), match.group(2)
             database.put(key, data)
     database.close()
+    
+def termsbtree(name="./indexes/te.idx"):
+    database = db.DB()
+    database.open(name, None, db.DB_BTREE, db.DB_CREATE)
+    with open("./output/terms.txt", 'r') as f:
+        for l in f: 
+            match = re.search("(.*):(.*)",l)
+            kry, data = match.group(1).encode(), match.group(2)
+            database.put(key, data)
+    database.close()
