@@ -36,6 +36,8 @@ class Parser():
         else:
             return None
 
+    # Maybe have the other methods return the query with the sub query removed,
+    # then after all other methods are called the only thing left is a term query?
     def _termQuery(self, string):
         #not implemented
         return None
