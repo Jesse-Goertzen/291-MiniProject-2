@@ -74,5 +74,8 @@ class Date():
     def __ne__(self, other):
         return self.date != other.date
 
+    def __repr__(self):
+        return str(self.date)
+
     def __str__(self):
-        return self.date
+        return str(self.date)
