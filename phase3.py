@@ -39,6 +39,7 @@ class Parser():
         return match if match else None
 
     def parse(self, string):
+        self.string = string
         queries = dict()
         queries["date"] = self._dateQuery()
         queries["prices"] = self._priceQuery()
@@ -48,5 +49,5 @@ class Parser():
         for q in queries:
             if queries[q] is None:
                 del queries[q]
-                
+
         return queries
