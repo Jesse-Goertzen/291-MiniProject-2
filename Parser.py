@@ -1,8 +1,5 @@
-import bsddb3
 import re
 from Date import Date
-
-# I have a feeling this is gonna require a lot of regex....
 
 class Parser():
     string = ""
