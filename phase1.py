@@ -31,7 +31,7 @@ def prices(path, output="./output/prices.txt"):
                     d.write("%s:%s,%s,%s\n" % (price, aid, cat, loc))
     
     with open(output, 'r+') as f:
-        lines = sorted(set(f.readlines()))
+        lines = sorted(set(f.readlines()), key=lambda line : int(line.split(':')[0]))
         f.seek(0)
         f.writelines(lines)
         f.truncate()
@@ -71,10 +71,10 @@ def terms(path, output="./output/terms.txt"):
                             if len(term.group(1)) > 2:
                                 o.write(term.group(1) + ":" + aid + '\n')
     with open(output, 'r+') as f:
-    lines = sorted(set(f.readlines()))
-    f.seek(0)
-    f.writelines(lines)
-    f.truncate()
+        lines = sorted(set(f.readlines()))
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
 
 
 # Now we can simply do: {from phase1 import init} then call to create all files based on the path to whatever records we're using
@@ -92,4 +92,3 @@ def tests():
         prices(inputs[i], "./output/prices" + mods[i] + ".txt")
         ads(inputs[i], "./output/ads" + mods[i] + ".txt")
         terms(inputs[i], "./output/terms" + mods[i] + ".txt")
-
