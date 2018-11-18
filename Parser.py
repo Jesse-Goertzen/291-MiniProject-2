@@ -1,5 +1,4 @@
 import re
-from Date import Date
 
 class Parser():
     string = ""
@@ -12,8 +11,6 @@ class Parser():
     def _dateQuery(self):
         match = re.findall("date\s*(<|<=|>|>=|=)\s*(\d{4}/\d{2}/\d{2})", self.string)
         self.string = re.sub("date\s*(<|<=|>|>=|=)\s*\d{4}/\d{2}/\d{2}", "", self.string)
-        for i, m in enumerate(match):
-            match[i] = (m[0], Date(m[1]))
         return match if match else None
 
 
