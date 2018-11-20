@@ -92,3 +92,5 @@ def tests():
         prices(inputs[i], "./output/prices" + mods[i] + ".txt")
         ads(inputs[i], "./output/ads" + mods[i] + ".txt")
         terms(inputs[i], "./output/terms" + mods[i] + ".txt")
+
+init('./10records.txt')
