@@ -1,5 +1,5 @@
 from bsddb3 import db
-# from tabulate import tabulate
+from tabulate import tabulate
 import struct
 import re
 
