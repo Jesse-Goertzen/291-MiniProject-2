@@ -11,14 +11,25 @@ class Parser():
     def _dateQuery(self):
         match = re.findall("date\s*(<|<=|>|>=|=)\s*(\d{4}/\d{2}/\d{2})", self.string)
         self.string = re.sub("date\s*(<|<=|>|>=|=)\s*\d{4}/\d{2}/\d{2}", "", self.string)
-        return match if match else None
-
+        if match:
+            ret = []
+            for s in match:
+                ret.append(' '.join(str(c) for c in s))
+            return ret
+        else:
+            return None
 
     # returns: (operator {str}, price {int})
     def _priceQuery(self):
         match = re.findall("price\s*(<|<=|>|>=|=)\s*(\d+)", self.string)
         self.string = re.sub("price\s*(<|<=|>|>=|=)\s*\d+", "", self.string)
-        return match if match else None
+        if match:
+            ret = []
+            for s in match:
+                ret.append(' '.join(str(c) for c in s))
+            return ret
+        else:
+            return None
     
     def _locQuery(self):
         match = re.findall("location\s*=\s*([0-9a-zA-Z_-]+)", self.string)
