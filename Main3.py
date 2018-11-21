@@ -49,11 +49,10 @@ def main():
                 while struct.unpack('>l', result[0])[0] == int(parsedq["price"][0][1]):
                     print(struct.unpack('>l', result[0])[0])
                     result = curs.next()
-            while result != None:
-                # while loops through all the same values to make sure there are none that are equal
-                while struct.unpack('>l', result[0])[0] == int(parsedq["price"][0][1]):
+            # while loops through all the same values to make sure there are none that are equal
+            while struct.unpack('>l', result[0])[0] == int(parsedq["price"][0][1]):
                     result = curs.next()
-            
+            while result != None:            
             # if int(result[0].decode("utf-8")) < int(parsedq["price"][0][1]):
             #     break
             # struct.unpack('>l', iterr[0])[0]
