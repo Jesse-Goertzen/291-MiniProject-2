@@ -1,12 +1,14 @@
 from bsddb3 import db
+# from tabulate import tabulate
 import struct
+import re
 
 class Database():
     self.queries = dict()
     self.results = list()
 
     def __init__(self, queries):
-        pass
+        self.output = False # Brief output by default
 
     def _getKey(self, case):
         return str(struct.unpack('>l', case[0])[0])
@@ -275,6 +277,25 @@ class Database():
             self.queries['date'] = corrected
         
 
+    def _adQuery(self, ads):
+        dbfile = "./indexes/ad.idx"
+        dbase = db.DB()
+        dbase.open(dbfile, None, db.DB_BTREE)
+        cur = dbase.cursor()
+
+        result = list()
+        end = self._getKey(cur.last())
+        line = cur.first()
+        while self._getKey(line) != end:
+            if self._getKey(line) in ads:
+                data = line[1]
+                if self.output: # full output
+                    result.append(re.search("<aid>(.*)</aid><date>(.*)</date><loc>(.*)</loc><cat>(.*)</cat><ti>(.*)</ti><desc>(.*)</desc><price>(.*)</price>", data).groups())
+                else:
+                    result.append(re.search("<aid>(.*)</aid><ti>(.*)</ti>", data).groups())
+
+        return result
+
     def get(self, queries):
         self.queries = queries
 
@@ -316,6 +337,20 @@ class Database():
         if queries['term']:
             self._termQuery()
 
-        return set.intersection(*self.results)
+        result = self._adQuery(set.intersection(*self.results))
 
+        if self.output:
+            print(tabulate(result, headers=['Ad ID', 'Date', 'Location', 'Catagory', 'Title', 'Description', 'Price']))
+        else:
+            print(tabulate(result, headers=['Ad ID', 'Title']))
+    
+    # Set output type, returns the status of the update. e.g. 'False' if user doesnt enter brief or full, true otherwise
+    def setOutput(self, string):
+        if string.lower() == 'brief':
+            self.output = False
+        elif string.lower() == 'full':
+            self.output = True
+        else:
+            return False
         
+        return True
