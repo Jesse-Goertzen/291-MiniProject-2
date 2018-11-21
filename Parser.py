@@ -14,6 +14,8 @@ class Parser():
         if match:
             ret = []
             for s in match:
+                if s[0] == '=':
+                    s = ("==", s[1])  
                 ret.append(' '.join(str(c) for c in s))
             return ret
         else:
@@ -26,6 +28,8 @@ class Parser():
         if match:
             ret = []
             for s in match:
+                if s[0] == '=':
+                    s = ("==", s[1])  
                 ret.append(' '.join(str(c) for c in s))
             return ret
         else:
@@ -66,7 +70,7 @@ if __name__ == "__main__":
         "camera%",
         "date        <= 2018/11/05",
         "date           >      2018/11/05",
-        "price < 20",
+        "price = 20",
         "price >=         20",
         "location=       edmonton     date=2018/11/07",
         "cat=art-collectibles       camera",
