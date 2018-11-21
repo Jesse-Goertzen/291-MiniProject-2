@@ -59,13 +59,18 @@ def main():
             # struct.pack('>l', key)
                 print(struct.unpack('>l', result[0])[0])
                 result = curs.next()
-        else:
+        else if parsedq["price"][0][0][0] == "<":
             # issue, 100 pulls 130 as the first value. Could hard code solution but not gonna hit up notes tonight
             # i thought it grabbed smallest or equal value, guess it does greater or equal? yolo
             # also not copying the code down tonight but it works for less than! <
             while result != None:
                 print(struct.unpack('>l', result[0])[0])
                 result = curs.prev()
+        else:
+            while struct.unpack('>l', result[0])[0] == int(parsedq["price"][0][1]):
+                print(struct.unpack('>l', result[0])[0])
+                result = curs.next()
+                
 #    curs = database.cursor()
     #    print(type(parsedq["date"][0]))
     #    result = curs.set_range(((str(parsedq["date"][0][1]).encode("utf-8"))))
