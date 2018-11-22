@@ -19,7 +19,7 @@ class Parser():
                 ret.append(' '.join(str(c) for c in s))
             return ret
         else:
-            return None
+            return []
 
     # returns: (operator {str}, price {int})
     def _priceQuery(self):
@@ -33,24 +33,24 @@ class Parser():
                 ret.append(' '.join(str(c) for c in s))
             return ret
         else:
-            return None
+            return []
     
     def _locQuery(self):
         match = re.findall("location\s*=\s*([0-9a-zA-Z_-]+)", self.string)
         self.string = re.sub("location\s*=\s*[0-9a-zA-Z_-]+", "", self.string)
-        return match if match else None
+        return match if match else []
     
     def _catQuery(self):
         match = re.findall("cat\s*=\s*([0-9a-zA-Z_-]+)", self.string)
         self.string = re.sub("cat\s*=\s*[0-9a-zA-Z_-]+", "", self.string)
-        return match if match else None
+        return match if match else []
 
     # Maybe have the other methods return the query with the sub query removed,
     # then after all other methods are called the only thing left is a term query?
     def _termQuery(self):
         match = re.findall("[a-zA-Z0-9_-]+%?", self.string)
         self.string = re.sub("[a-zA-Z0-9_-]+%?", "", self.string)
-        return match if match else None
+        return match if match else []
 
     def parse(self, string):
         self.string = string
@@ -60,8 +60,8 @@ class Parser():
         queries["loc"] = self._locQuery()
         queries["cat"] = self._catQuery()
         queries["term"] = self._termQuery()
-        q = {k:v for k,v in queries.items() if v is not None}
-        return q
+        # q = {k:v for k,v in queries.items() if v is not None}
+        return queries
 
 if __name__ == "__main__":
     p = Parser()
