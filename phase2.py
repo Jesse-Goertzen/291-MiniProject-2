@@ -30,19 +30,18 @@ def pricesBtree(name="./indexes/pr.idx"):
     curs = database.cursor()
     with open("./output/prices.txt", 'r') as f:
         for l in f:
-            match = re.search("(\d*):(.*)", l)
-            key, data = int(match.group(1)), match.group(2)
-            key = struct.pack('>l', key)
+            match = re.search("(.*):(.*)", l)
+            key, data = match.group(1).encode(), match.group(2)
             database.put(key, data)
 
-    curs.close()
-    curs = database.cursor()
-    iterr = curs.first()
-    while iterr:
-       # print(iterr)
-        print(struct.unpack('>l', iterr[0]))
-        iterr = curs.next()
-    curs.close()
+    # curs.close()
+    # curs = database.cursor()
+    # iterr = curs.first()
+    # while iterr:
+    #    # print(iterr)
+    #     print(struct.unpack('>l', iterr[0]))
+    #     iterr = curs.next()
+    # curs.close()
 
     database.close()
     

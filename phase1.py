@@ -1,4 +1,5 @@
 import re
+import sys
 
 #d:a,c,l
 def pdates(path, output="./output/pdate.txt"):
@@ -24,7 +25,7 @@ def prices(path, output="./output/prices.txt"):
         with open(path, 'r') as r:
             for l in r:
                 if re.search("<ad>(.*)</ad>", l) is not None:
-                    price = re.search("<price>(.*)</price>", l).group(1)
+                    price = re.search("<price>(.*)</price>", l).group(1).rjust(12)
                     aid   = re.search("<aid>(.*)</aid>", l).group(1)
                     cat   = re.search("<cat>(.*)</cat>", l).group(1)
                     loc   = re.search("<loc>(.*)</loc>", l).group(1)
@@ -93,4 +94,7 @@ def tests():
         ads(inputs[i], "./output/ads" + mods[i] + ".txt")
         terms(inputs[i], "./output/terms" + mods[i] + ".txt")
 
-init('./10records.txt')
+init('./1000records.txt')
+
+# def main(argv):
+#     records = sys.argv[1]

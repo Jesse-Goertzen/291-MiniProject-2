@@ -1,19 +1,19 @@
 from bsddb3 import db
 from tabulate import tabulate
+from Parser import Parser
+from textwrap import fill
 import struct
 import re
+
+debug = True
 
 class Database():
     queries = dict()
     results = list()
+    p = Parser()
 
-    def __init__(self, queries):
+    def __init__(self):
         self.output = False # Brief output by default
-        self.queries = queries
-        self.results = results
-
-    def _getKey(self, case):
-        return str(struct.unpack('>l', case[0])[0])
 
     def _dateQuery(self):
         dbfile = "./indexes/da.idx"
@@ -24,15 +24,50 @@ class Database():
         for query in self.queries['date']:
             op, date = query.split()
             result = set()
-            line = cur.set_range(struct.pack('>l', date))
+            line = cur.set_range(date.encode())
+            line = (line[0].decode(), line[1].decode())
 
             # Get passed the ads with date equal to the desired date to be greater than
             if op == '>':
-                while self._getKey(line) == date:
+                while line[0] == date:
                     line = cur.next()
+                    if line is None:
+                        break #this is probs an issue if you try and find greater than last date
+                    else: 
+                        line = (line[0].decode(), line[1].decode())
+            if op == '<':
+                line = cur.prev()
+                if line is None:
+                    break
+                else:
+                    line = (line[0].decode(), line[1].decode())
             
+            # there absolutely has to be a better way to do this...but it works?
+            # basically cur.set_range() will put us at the first matching date, but we needa look at all
+            # the dates that are equal to the requriment too, not just the first one then go backwards
+            # so this if: {...} puts the cursor at the last date equal to the requirement
+            if op == '<=':  
+                line = cur.next()
+                if line is None:
+                    line = cur.prev()
+                    line = (line[0].decode(), line[1].decode())
+                    break
+                else:
+                    line = (line[0].decode(), line[1].decode())
+                while line[0] == date:
+                    line = cur.next()
+                    if line is None:
+                        line = cur.prev()
+                        line = (line[0].decode(), line[1].decode())
+                        break
+                    else:
+                        line = (line[0].decode(), line[1].decode())
+                
+                line = cur.prev()
+                line = (line[0].decode(), line[1].decode())
+                
             # Handles all operators, after the previous while loop considering the ">" case
-            while eval(self._getKey(line) + query):
+            while eval("'%s' %s '%s'" % (line[0], op, date)):
                 aid, cat, loc = line[1].split(',')
 
                 # Add the aid to result set if no location or catagory is specified,
@@ -57,7 +92,12 @@ class Database():
                 else: # < or <=
                     line = cur.prev()
 
-            self.results.add(result)
+                if line is None:
+                    break
+                else:
+                    line = (line[0].decode(), line[1].decode())
+
+            self.results.append(result)
 
         dbase.close()
 
@@ -77,7 +117,7 @@ class Database():
         
         result = set()
         lop, ldate = lower.split()
-        line = cur.set_range(struct.pack('>l', date))
+        line = cur.set_range(struct.pack('>l', ldate))
         while eval(self._getKey(line) + lower + 'and' + self._getKey(line) + upper):
             aid, cat, loc = line[1].split(',')
 
@@ -102,7 +142,8 @@ class Database():
         self.results.append(result)
         dbase.close()
 
-
+    # TODO: Unfuck this. For some reason the cursor is putting us at random spots. Obviously something 
+    #       nasty with the keys... but I can't be assed to figure it out. Everything else works flawlessly (jynx)
     def _priceQuery(self):
         dbfile = "./indexes/pr.idx"
         dbase = db.DB()
@@ -112,15 +153,52 @@ class Database():
         for query in self.queries['price']:
             op, price = query.split()
             result = set()
-            line = cur.set_range(struct.pack('>l', int(price)))
+            line = cur.set_range(price.encode())
+            line = (line[0].decode(), line[1].decode())
 
             # Get passed the ads with price equal to the desired price to be greater than
             if op == '>':
-                while self._getKey(line) == price:
+                while line[0].lstrip() == price:
                     line = cur.next()
+                    if line is None:
+                        break
+                    else:
+                        line = (line[0].decode(), line[1].decode())
+
+            if op == '<':
+                line = cur.prev()
+                if line is None:
+                    return
+                else:
+                    line = (line[0].decode(), line[1].decode())
+
+            # there absolutely has to be a better way to do this...but it works?
+            # basically cur.set_range() will put us at the first matching date, but we needa look at all
+            # the dates that are equal to the requriment too, not just the first one then go backwards
+            # so this if: {...} puts the cursor at the last date equal to the requirement
+            if op == '<=':  
+                line = cur.next()
+                if line is None:
+                    line = cur.prev()
+                    line = (line[0].decode(), line[1].decode())
+                    break
+                else:
+                    line = (line[0].decode(), line[1].decode())
+            
+                while line[0] == price:
+                    line = cur.next()
+                    if line is None:
+                        line = cur.prev()
+                        line = (line[0].decode(), line[1].decode())
+                        break
+                    else:
+                        line = (line[0].decode(), line[1].decode())
+                
+                line = cur.prev()
+                line = (line[0].decode(), line[1].decode())
             
             # Handles all operators, after the previous while loop considering the ">" case            
-            while eval(self._getKey(line) + query):
+            while eval("%s %s %s" % (line[0].lstrip(), op, price)):
                 aid, cat, loc = line[1].split(',')
 
                 # Add the aid to result set if no location or catagory is specified,
@@ -144,7 +222,12 @@ class Database():
                 else: # < or <=
                     line = cur.prev()
 
-            self.results.add(result)
+                if line is None:
+                    break
+                else:
+                    line = (line[0].decode(), line[1].decode())
+
+            self.results.append(result)
 
         dbase.close()
 
@@ -201,14 +284,18 @@ class Database():
         cur = dbase.cursor()
 
         result = set()
-        end = cur.last()
         line = cur.first()
-        while line != end:
-            if self._getKey(line) in self.queries['term']:
+        line = (line[0].decode(), line[1].decode())
+        while True:
+            if line[0] in self.queries['term']:
                 result.add(line[1])
             line = cur.next()
+            if line is None:
+                break
+            else:
+                line = (line[0].decode(), line[1].decode())
         
-        self.results.add(result)
+        self.results.append(result)
         dbase.close()
         
 
@@ -282,31 +369,39 @@ class Database():
     def _adQuery(self, ads):
         dbfile = "./indexes/ad.idx"
         dbase = db.DB()
-        dbase.open(dbfile, None, db.DB_BTREE)
+        dbase.open(dbfile, None, db.DB_HASH)
         cur = dbase.cursor()
 
         result = list()
-        end = self._getKey(cur.last())
         line = cur.first()
-        while self._getKey(line) != end:
-            if self._getKey(line) in ads:
+        line = (line[0].decode(), line[1].decode())
+        while True:
+            if line[0] in ads:
                 data = line[1]
                 if self.output: # full output
-                    result.append(re.search("<aid>(.*)</aid><date>(.*)</date><loc>(.*)</loc><cat>(.*)</cat><ti>(.*)</ti><desc>(.*)</desc><price>(.*)</price>", data).groups())
+                    r = list(re.search("<aid>(.*)</aid><date>(.*)</date><loc>(.*)</loc><cat>(.*)</cat><ti>(.*)</ti><desc>(.*)</desc><price>(.*)</price>", data).groups())
+                    r[4], r[5] = fill(r[4], 32), fill(r[5], 48)
+                    result.append(r)
                 else:
-                    result.append(re.search("<aid>(.*)</aid><ti>(.*)</ti>", data).groups())
+                    r = list(re.search("<aid>(.*)</aid>.*<ti>(.*)</ti>", data).groups())
+                    r[1] = fill(r[1], 120)
+                    result.append(r)
+
+            line = cur.next()
+            if line is None:
+                break
+            else:
+                line = (line[0].decode(), line[1].decode())
+            
 
         return result
 
-    def get(self, queries):
-        self.queries = queries
+    def get(self, string):
+        self.results = []
+        self.queries = self.p.parse(string)
 
-        try:
-            self._checkDates()
-            self._checkPrices()
-        except ValueError:
-            # query is invalid, will return nothing -- pass for now? 
-            pass
+        self._checkDates()
+        self._checkPrices()
 
         self.numLoc = len(self.queries['loc'])
         self.numCat = len(self.queries['cat'])
@@ -333,26 +428,21 @@ class Database():
             else:
                 self._priceQuery()
         else:
-            self.queries['price'] = ['>= 0']
-            self._priceQuery()
+            self.queries['date'] = ['>= 0000/00/00']
+            self._dateQuery()
 
-        if queries['term']:
+        if self.queries['term']:
             self._termQuery()
 
         result = self._adQuery(set.intersection(*self.results))
 
         if self.output:
-            print(tabulate(result, headers=['Ad ID', 'Date', 'Location', 'Catagory', 'Title', 'Description', 'Price']))
+            print(tabulate(result, headers=['Ad ID', 'Date', 'Location', 'Catagory', 'Title', 'Description', 'Price'], tablefmt="fancy_grid"))
+            print("Number of Results = " + len(result))
         else:
-            print(tabulate(result, headers=['Ad ID', 'Title']))
+            print(tabulate(result, headers=['Ad ID', 'Title'], tablefmt="fancy_grid"))
+            print("Number of Results = %d" % len(result))
     
     # Set output type, returns the status of the update. e.g. 'False' if user doesnt enter brief or full, true otherwise
-    def setOutput(self, string):
-        if string.lower() == 'brief':
-            self.output = False
-        elif string.lower() == 'full':
-            self.output = True
-        else:
-            return False
-        
-        return True
+    def setOutput(self, flag):
+        self.output = flag
