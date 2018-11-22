@@ -13,3 +13,10 @@ bsddb3 from https://www.lfd.uci.edu/~gohlke/pythonlibs/#bsddb3
 We also included the module tabulate in tabulate.py to print our results cleanly. 
 
   Source https://pypi.org/project/tabulate/
+  
+  
+# Current Issues
+
+Prices -- Royally messed up
+
+Dates outside the range of the data crash the program. Should be easy to fix
