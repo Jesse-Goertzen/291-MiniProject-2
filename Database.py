@@ -4,11 +4,13 @@ import struct
 import re
 
 class Database():
-    self.queries = dict()
-    self.results = list()
+    queries = dict()
+    results = list()
 
     def __init__(self, queries):
         self.output = False # Brief output by default
+        self.queries = queries
+        self.results = results
 
     def _getKey(self, case):
         return str(struct.unpack('>l', case[0])[0])
@@ -217,7 +219,7 @@ class Database():
         corrected = list()
         for p in prices:
             op, price = p.split()
-            price = (int) price
+            price = int(price)
             if op == '==':
                 if len(prices) > 1:
                     raise ValueError # Cant have a price equal to something, AND have other conditions on it
