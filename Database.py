@@ -15,6 +15,53 @@ class Database():
     def __init__(self):
         self.output = False # Brief output by default
 
+    def _setCursor(self, cur, op, data):
+        def decode(line):
+            return (line[0].decode(), line[1].decode())
+
+        line = cur.set_range(data.encode())
+        try:
+            line = decode(line)
+        except TypeError:
+            if op == '<' or op == '<=':
+                while line is None:
+                    line = cur.prev()
+                
+                line = decode(line)
+            else: return None
+
+        if op == '>':
+            while line[0] == data:
+                line = cur.next()
+                if line is None:
+                    return None
+                else:
+                    line = decode(line)
+
+        if op == '<':
+            line = cur.prev()
+            if line is None:
+                return None
+            else:
+                line = decode(line)
+
+        if op == '<=':
+            while True:
+                line = cur.next()
+                if line is None:
+                    line = cur.prev()
+                    line = decode(line)
+                    break
+                else:
+                    line = decode(line)
+                
+                if line[0] != data:
+                    line = cur.prev()
+                    line = decode(line)
+                    break
+
+        return line
+
     def _dateQuery(self):
         dbfile = "./indexes/da.idx"
         dbase = db.DB()
@@ -24,48 +71,13 @@ class Database():
         for query in self.queries['date']:
             op, date = query.split()
             result = set()
-            line = cur.set_range(date.encode())
-            line = (line[0].decode(), line[1].decode())
+            line = self._setCursor(cur, op, date)
 
-            # Get passed the ads with date equal to the desired date to be greater than
-            if op == '>':
-                while line[0] == date:
-                    line = cur.next()
-                    if line is None:
-                        break #this is probs an issue if you try and find greater than last date
-                    else: 
-                        line = (line[0].decode(), line[1].decode())
-            if op == '<':
-                line = cur.prev()
-                if line is None:
-                    break
-                else:
-                    line = (line[0].decode(), line[1].decode())
-            
-            # there absolutely has to be a better way to do this...but it works?
-            # basically cur.set_range() will put us at the first matching date, but we needa look at all
-            # the dates that are equal to the requriment too, not just the first one then go backwards
-            # so this if: {...} puts the cursor at the last date equal to the requirement
-            if op == '<=':  
-                line = cur.next()
-                if line is None:
-                    line = cur.prev()
-                    line = (line[0].decode(), line[1].decode())
-                    break
-                else:
-                    line = (line[0].decode(), line[1].decode())
-                while line[0] == date:
-                    line = cur.next()
-                    if line is None:
-                        line = cur.prev()
-                        line = (line[0].decode(), line[1].decode())
-                        break
-                    else:
-                        line = (line[0].decode(), line[1].decode())
-                
-                line = cur.prev()
-                line = (line[0].decode(), line[1].decode())
-                
+            if line is None:
+                self.results.append(set())
+                dbase.close()
+                return
+
             # Handles all operators, after the previous while loop considering the ">" case
             while eval("'%s' %s '%s'" % (line[0], op, date)):
                 aid, cat, loc = line[1].split(',')
@@ -117,8 +129,14 @@ class Database():
         
         result = set()
         lop, ldate = lower.split()
-        line = cur.set_range(struct.pack('>l', ldate))
-        while eval(self._getKey(line) + lower + 'and' + self._getKey(line) + upper):
+        uop, udate = upper.split()
+        line = self._setCursor(cur, lop, ldate)
+        if line is None:
+            self.results.append(set())
+            dbase.close()
+            return
+        
+        while eval("'%s' '%s' '%s' and '%s' %s '%s'" % (line[0], lop, ldate, line[0], uop, udate)):
             aid, cat, loc = line[1].split(',')
 
             # Add the aid to result set if no location or catagory is specified,
@@ -138,6 +156,10 @@ class Database():
                 pass
             
             line = cur.next()
+            if line is None:
+                break
+            else:
+                line = (line[0].decode(), line[1].decode())
 
         self.results.append(result)
         dbase.close()
@@ -283,19 +305,23 @@ class Database():
         dbase.open(dbfile, None, db.DB_BTREE)
         cur = dbase.cursor()
 
-        result = set()
-        line = cur.first()
-        line = (line[0].decode(), line[1].decode())
-        while True:
-            if line[0] in self.queries['term']:
-                result.add(line[1])
-            line = cur.next()
-            if line is None:
-                break
-            else:
-                line = (line[0].decode(), line[1].decode())
+        matches = list()
+        for t in self.queries['term']:
+            result = set()
+            line = cur.first()
+            line = (line[0].decode(), line[1].decode())
+            while True:
+                if line[0] == t:
+                    result.add(line[1])
+                line = cur.next()
+                if line is None:
+                    break
+                else:
+                    line = (line[0].decode(), line[1].decode())
         
-        self.results.append(result)
+            matches.append(result)
+
+        self.results.append(set.intersection(*matches))
         dbase.close()
         
 
@@ -342,8 +368,11 @@ class Database():
             op, date = d.split()
             if op == '==':
                 if len(dates) > 1:
-                    raise ValueError # Cant have a date equal to something, AND have other conditions on it
-                self.queries['date'] = [p]
+                    for d2 in dates:
+                        op2, date2 = d2.split()
+                        if not eval("'%s' %s '%s'" % (date, op2, date2)):
+                            raise ValueError # Date equal to a value not within other restrictions
+                self.queries['date'] = [d]
                 return
             elif op == '>=' or op == '>':
                 g.append((date, d))
@@ -380,7 +409,8 @@ class Database():
                 data = line[1]
                 if self.output: # full output
                     r = list(re.search("<aid>(.*)</aid><date>(.*)</date><loc>(.*)</loc><cat>(.*)</cat><ti>(.*)</ti><desc>(.*)</desc><price>(.*)</price>", data).groups())
-                    r[4], r[5] = fill(r[4], 32), fill(r[5], 48)
+                    r[4], r[5] = fill(r[4], 32), fill(r[5], 40)
+                    r = [r[0], r[4], r[5], r[6], r[3], r[2], r[1]]
                     result.append(r)
                 else:
                     r = list(re.search("<aid>(.*)</aid>.*<ti>(.*)</ti>", data).groups())
@@ -437,8 +467,9 @@ class Database():
         result = self._adQuery(set.intersection(*self.results))
 
         if self.output:
-            print(tabulate(result, headers=['Ad ID', 'Date', 'Location', 'Catagory', 'Title', 'Description', 'Price'], tablefmt="fancy_grid"))
-            print("Number of Results = " + len(result))
+            # print(tabulate(result, headers=['Ad ID', 'Date', 'Location', 'Catagory', 'Title', 'Description', 'Price'], tablefmt="fancy_grid"))
+            print(tabulate(result, headers=['Ad ID', 'Title', 'Description', 'Price', 'Catagory', 'Location', 'Date'], tablefmt="fancy_grid"))
+            print("Number of Results = %d" % len(result))
         else:
             print(tabulate(result, headers=['Ad ID', 'Title'], tablefmt="fancy_grid"))
             print("Number of Results = %d" % len(result))

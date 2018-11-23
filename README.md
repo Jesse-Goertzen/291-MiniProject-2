@@ -19,8 +19,7 @@ We also included the module tabulate in tabulate.py to print our results cleanly
 
 Prices -- Royally messed up
 
-Dates outside the range of the data crash the program. Should be easy to fix
-
-betweenDates() and betweenPrices() currently are not updated to not use structs, should be a matter of referencing the other methods and fixing.
+betweenPrices() currently are not updated to not use structs, should be a matter of referencing the other methods and fixing.
 
 term query wildcards are not implemented
+
