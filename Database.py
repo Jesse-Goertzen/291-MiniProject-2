@@ -5,8 +5,6 @@ from textwrap import fill
 import struct
 import re
 
-debug = True
-
 class Database():
     queries = dict()
     results = list()
@@ -98,7 +96,6 @@ class Database():
                 else:
                     pass
 
-                # TODO: Figure out if we need to handle == any differently
                 if op == '>' or op == '>=' or op == '==':
                     line = cur.next()
                 else: # < or <=
@@ -175,49 +172,11 @@ class Database():
         for query in self.queries['price']:
             op, price = query.split()
             result = set()
-            line = cur.set_range(price.encode())
-            line = (line[0].decode(), line[1].decode())
-
-            # Get passed the ads with price equal to the desired price to be greater than
-            if op == '>':
-                while line[0].lstrip() == price:
-                    line = cur.next()
-                    if line is None:
-                        break
-                    else:
-                        line = (line[0].decode(), line[1].decode())
-
-            if op == '<':
-                line = cur.prev()
-                if line is None:
-                    return
-                else:
-                    line = (line[0].decode(), line[1].decode())
-
-            # there absolutely has to be a better way to do this...but it works?
-            # basically cur.set_range() will put us at the first matching date, but we needa look at all
-            # the dates that are equal to the requriment too, not just the first one then go backwards
-            # so this if: {...} puts the cursor at the last date equal to the requirement
-            if op == '<=':  
-                line = cur.next()
-                if line is None:
-                    line = cur.prev()
-                    line = (line[0].decode(), line[1].decode())
-                    break
-                else:
-                    line = (line[0].decode(), line[1].decode())
-            
-                while line[0] == price:
-                    line = cur.next()
-                    if line is None:
-                        line = cur.prev()
-                        line = (line[0].decode(), line[1].decode())
-                        break
-                    else:
-                        line = (line[0].decode(), line[1].decode())
-                
-                line = cur.prev()
-                line = (line[0].decode(), line[1].decode())
+            line = self._setCursor(cur, op, price)
+            if line is None:
+                self.results.append(set())
+                dbase.close()
+                return
             
             # Handles all operators, after the previous while loop considering the ">" case            
             while eval("%s %s %s" % (line[0].lstrip(), op, price)):
