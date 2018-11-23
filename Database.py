@@ -35,13 +35,23 @@ class Database():
                     return None
                 else:
                     line = decode(line)
-
+        # Doesn't this need the while loop from above and
+        # Extra condition for when its greater? Such as typing in price infinity and it returns the largest value
+        # and takes the second largest only 
         if op == '<':
-            line = cur.prev()
+            print(line)
+            #line = cur.prev()
             if line is None:
                 return None
             else:
-                line = decode(line)
+                test = cur.next()
+                if test is None and line[0] < data:
+                    print("NONE")
+                    line = cur.prev()
+                    return line
+                else:
+                    line = cur.prev()
+                    line = decode(line)
 
         if op == '<=':
             while True:
@@ -172,12 +182,13 @@ class Database():
         for query in self.queries['price']:
             op, price = query.split()
             result = set()
-            line = self._setCursor(cur, op, price)
+            print(price)
+            line = self._setCursor(cur, op, "{:>12}".format(price))
             if line is None:
                 self.results.append(set())
                 dbase.close()
                 return
-            
+            print(eval("%s %s %s" % (line[0].lstrip(), op, price)))
             # Handles all operators, after the previous while loop considering the ">" case            
             while eval("%s %s %s" % (line[0].lstrip(), op, price)):
                 aid, cat, loc = line[1].split(',')
@@ -227,13 +238,16 @@ class Database():
                 upper = p
 
         result = set()
+        print(lower, "and", upper)
         lop, lprice = lower.split()
-        line = cur.set_range(struct.pack(int(lprice)))
-        if lop == '>':
-            while self._getKey(line) == lprice:
-                line = cur.next()
+        uop, uprice = upper.split()
+        line = self._setCursor(cur, lop, "{:>12}".format(lprice))
+        if line is None:
+            self.results.append(set())
+            dbase.close()
+            return
         
-        while eval(self._getKey(line) + lower + ' and ' + self._getKey(line) + upper):
+        while eval("'%s' '%s' '%s' and '%s' '%s' '%s'" % (line[0], lop, lprice, line[0], uop, uprice)):
             aid, cat, loc = line[1].split(',')
 
             # Add the aid to result set if no location or catagory is specified,
@@ -253,6 +267,10 @@ class Database():
                 pass
             
             line = cur.next()
+            if line is None:
+                break
+            else:
+                line = (line[0].decode(), line[1].decode())
 
         self.results.append(result)
         dbase.close()
