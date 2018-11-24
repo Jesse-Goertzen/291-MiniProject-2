@@ -39,19 +39,26 @@ class Database():
         # Extra condition for when its greater? Such as typing in price infinity and it returns the largest value
         # and takes the second largest only 
         if op == '<':
-            print(line)
+            print("this is first line: ", line)
             #line = cur.prev()
             if line is None:
                 return None
             else:
                 test = cur.next()
                 if test is None and line[0] < data:
+                    print(line[0], "= line[0] , data = ", data)
                     print("NONE")
-                    line = cur.prev()
+                    #line = cur.prev()
+                    print("Line in the NONE case: ", line)
                     return line
+                    
                 else:
                     line = cur.prev()
+                    line = cur.prev()
+                    if line is None:
+                        return None
                     line = decode(line)
+                    print("Printing line again: ", line)
 
         if op == '<=':
             while True:
@@ -188,7 +195,8 @@ class Database():
                 self.results.append(set())
                 dbase.close()
                 return
-            print(eval("%s %s %s" % (line[0].lstrip(), op, price)))
+            
+            print("eval evaluates to: ", eval("%s %s %s" % (line[0].lstrip(), op, price)))
             # Handles all operators, after the previous while loop considering the ">" case            
             while eval("%s %s %s" % (line[0].lstrip(), op, price)):
                 aid, cat, loc = line[1].split(',')
@@ -229,7 +237,6 @@ class Database():
         dbase = db.DB()
         dbase.open(dbfile, None, db.DB_BTREE)
         cur = dbase.cursor()
-
         lower, upper = '', ''
         for p in self.queries['price']:
             if p.split()[0] == '>=' or p.split()[0] == '>':
@@ -246,8 +253,11 @@ class Database():
             self.results.append(set())
             dbase.close()
             return
-        
-        while eval("'%s' '%s' '%s' and '%s' '%s' '%s'" % (line[0], lop, lprice, line[0], uop, uprice)):
+        print(line[0].lstrip(), lop, lprice, uop, uprice)
+        print(eval("%s %s %s" % (line[0].lstrip(), lop, lprice)))
+        print(eval("%s %s %s" % (line[0].lstrip(), uop, uprice)))
+        while eval("%s %s %s and %s %s %s" % (line[0].lstrip(), lop, lprice, line[0].lstrip(), uop, uprice)):
+            print("Weeknd is famous ")
             aid, cat, loc = line[1].split(',')
 
             # Add the aid to result set if no location or catagory is specified,
