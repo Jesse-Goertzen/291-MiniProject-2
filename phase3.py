@@ -8,7 +8,7 @@ def main():
     system('cls||clear')
     print("Welcome to sqlite3 clone!\n\rFeel free to query the database of ads. Type !help for assistance at any time.\n")
     while True:
-        query = input('>> ').lower()
+        query = input('>>> ').lower()
         # if re.search("output[\s]*=[\s]*brief", query):
         if query == 'output=brief':
             db.setOutput(False)
@@ -25,7 +25,7 @@ def main():
             continue
         elif query == '!clear':
             system('cls||clear')
-            print("Welcome to sqlite3 clone!\n\rFeel free to query the database of ads. Type !help for assistance at anytime.")
+            print("Welcome to sqlite3 clone!\n\rFeel free to query the database of ads. Type !help for assistance at anytime.\n")
             continue
         elif query == '!quit':
             sys.exit()

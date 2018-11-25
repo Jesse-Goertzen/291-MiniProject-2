@@ -46,25 +46,27 @@ class Database():
             else:
                 test = cur.next()
                 if test is None and line[0] < data:
-                    print(line[0], "= line[0] , data = ", data)
-                    print("NONE")
-                    #line = cur.prev()
-                    print("Line in the NONE case: ", line)
+                    # print(line[0], "= line[0] , data = ", data)
+                    # print("NONE")
+                    # line = cur.prev()
+                    # print("Line in the NONE case: ", line)
                     return line
-                    
+                elif test is None and line[0] == data:
+                    line = decode(cur.prev())
+                    return line
                 else:
                     line = cur.prev()
                     line = cur.prev()
                     if line is None:
                         return None
                     line = decode(line)
-                    print("Printing line again: ", line)
+                    # print("Printing line again: ", line)
 
         if op == '<=':
             while True:
                 line = cur.next()
                 if line is None:
-                    line = cur.prev()
+                    line = cur.last()
                     line = decode(line)
                     break
                 else:
@@ -178,8 +180,7 @@ class Database():
         self.results.append(result)
         dbase.close()
 
-    # TODO: Unfuck this. For some reason the cursor is putting us at random spots. Obviously something 
-    #       nasty with the keys... but I can't be assed to figure it out. Everything else works flawlessly (jynx)
+
     def _priceQuery(self):
         dbfile = "./indexes/pr.idx"
         dbase = db.DB()
@@ -189,15 +190,13 @@ class Database():
         for query in self.queries['price']:
             op, price = query.split()
             result = set()
-            print(price)
+            # print(price)
             line = self._setCursor(cur, op, "{:>12}".format(price))
             if line is None:
                 self.results.append(set())
                 dbase.close()
                 return
-            
-            print("eval evaluates to: ", eval("%s %s %s" % (line[0].lstrip(), op, price)))
-            # Handles all operators, after the previous while loop considering the ">" case            
+                   
             while eval("%s %s %s" % (line[0].lstrip(), op, price)):
                 aid, cat, loc = line[1].split(',')
 
@@ -245,7 +244,7 @@ class Database():
                 upper = p
 
         result = set()
-        print(lower, "and", upper)
+        # print(lower, "and", upper)
         lop, lprice = lower.split()
         uop, uprice = upper.split()
         line = self._setCursor(cur, lop, "{:>12}".format(lprice))
@@ -253,11 +252,11 @@ class Database():
             self.results.append(set())
             dbase.close()
             return
-        print(line[0].lstrip(), lop, lprice, uop, uprice)
-        print(eval("%s %s %s" % (line[0].lstrip(), lop, lprice)))
-        print(eval("%s %s %s" % (line[0].lstrip(), uop, uprice)))
+        # print(line[0].lstrip(), lop, lprice, uop, uprice)
+        # print(eval("%s %s %s" % (line[0].lstrip(), lop, lprice)))
+        # print(eval("%s %s %s" % (line[0].lstrip(), uop, uprice)))
         while eval("%s %s %s and %s %s %s" % (line[0].lstrip(), lop, lprice, line[0].lstrip(), uop, uprice)):
-            print("Weeknd is famous ")
+            # print("Weeknd is famous ")
             aid, cat, loc = line[1].split(',')
 
             # Add the aid to result set if no location or catagory is specified,
@@ -294,11 +293,17 @@ class Database():
 
         matches = list()
         for t in self.queries['term']:
+            wildcard = False
+            if t[-1] == '%':
+                t = t[0:-1]
+                wildcard = True
             result = set()
             line = cur.first()
             line = (line[0].decode(), line[1].decode())
             while True:
                 if line[0] == t:
+                    result.add(line[1])
+                elif wildcard and re.match(t + '.*', line[0]):
                     result.add(line[1])
                 line = cur.next()
                 if line is None:
@@ -322,7 +327,10 @@ class Database():
             price = int(price)
             if op == '==':
                 if len(prices) > 1:
-                    raise ValueError # Cant have a price equal to something, AND have other conditions on it
+                    for p2 in prices:
+                        op2, price2 = p2.split()
+                        if not eval("%s %s %s" % (price, op2, price2)):
+                            raise ValueError # Price equal to a value not within other restrictions
                 self.queries['price'] = [p]
                 return
             elif op == '>=' or op == '>':
@@ -370,7 +378,6 @@ class Database():
         try:
             if l[-1][0] < g[0][0]:
                 # No results? impossible date range. e.g. date < 2018/11/01 and date > 2018/11/02
-                # Not sure what to do, need to make a quick impossible query throw or something.
                 raise ValueError
         except IndexError:
             pass
@@ -416,9 +423,11 @@ class Database():
     def get(self, string):
         self.results = []
         self.queries = self.p.parse(string)
-
-        self._checkDates()
-        self._checkPrices()
+        try:
+            self._checkDates()
+            self._checkPrices()
+        except ValueError:
+            self.results.append(set())
 
         self.numLoc = len(self.queries['loc'])
         self.numCat = len(self.queries['cat'])
@@ -437,7 +446,7 @@ class Database():
                 self._dateQuery()
         elif numDate > 0 and numPrice > 0:
             if numDate == 2:
-                self._betweenDates
+                self._betweenDates()
             else:   
                 self._dateQuery()
             if numPrice == 2:
@@ -456,10 +465,10 @@ class Database():
         if self.output:
             # print(tabulate(result, headers=['Ad ID', 'Date', 'Location', 'Catagory', 'Title', 'Description', 'Price'], tablefmt="fancy_grid"))
             print(tabulate(result, headers=['Ad ID', 'Title', 'Description', 'Price', 'Catagory', 'Location', 'Date'], tablefmt="fancy_grid"))
-            print("Number of Results = %d" % len(result))
+            # print("Number of Results = %d" % len(result))
         else:
             print(tabulate(result, headers=['Ad ID', 'Title'], tablefmt="fancy_grid"))
-            print("Number of Results = %d" % len(result))
+            # print("Number of Results = %d" % len(result))
     
     # Set output type, returns the status of the update. e.g. 'False' if user doesnt enter brief or full, true otherwise
     def setOutput(self, flag):

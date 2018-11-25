@@ -94,7 +94,7 @@ def tests():
         ads(inputs[i], "./output/ads" + mods[i] + ".txt")
         terms(inputs[i], "./output/terms" + mods[i] + ".txt")
 
-init('./1000records.txt')
+init('./10records.txt')
 
 # def main(argv):
 #     records = sys.argv[1]
