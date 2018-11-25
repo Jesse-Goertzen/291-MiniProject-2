@@ -17,9 +17,5 @@ We also included the module tabulate in tabulate.py to print our results cleanly
   
 # Current Issues
 
-Prices -- Royally messed up
-
-betweenPrices() currently are not updated to not use structs, should be a matter of referencing the other methods and fixing.
-
-term query wildcards are not implemented
+Sorting files in phase1 needs to use linux commands
 
