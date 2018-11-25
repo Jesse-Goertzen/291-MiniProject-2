@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ads type="array">
+<ads type="array"> 
 <ad><aid>1304786670</aid><date>2018/11/07</date><loc>Calgary</loc><cat>camera-camcorder-lens</cat><ti>Nikon 500 mm F4 VR</ti><desc>I have owned this Nikon lens for about 2 years and purchased it new in Calgary. The lens is extremely sharp, and fast focusing. It is a wildlife or bird photographers dream lens. I am selling it</desc><price>8500</price></ad>
 <ad><aid>1385570526</aid><date>2018/11/05</date><loc>Edmonton</loc><cat>camera-camcorder-lens</cat><ti>NIKON D3s amateur useage body for sale</ti><desc>This camera has been my main travel camera and has generated wonderful prints some of which are hanging on our walls in paper, canvas and aluminum. The resolution and the HDR capability of shooting</desc><price>0</price></ad>
 <ad><aid>1275366783</aid><date>2018/11/07</date><loc>Calgary</loc><cat>camera-camcorder-lens</cat><ti>Canon 30D DSLR BODY Like New</ti><desc>Canon 30D DSLR BODY Perfect Woirking Condition like New</desc><price>240</price></ad>
