@@ -280,6 +280,8 @@ class Database():
 
         matches = list()
         for t in self.queries['term']:
+            if len(t) < 3:
+                continue
             wildcard = False
             if t[-1] == '%':
                 t = t[0:-1]
