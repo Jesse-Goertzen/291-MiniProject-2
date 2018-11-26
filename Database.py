@@ -39,17 +39,11 @@ class Database():
         # Extra condition for when its greater? Such as typing in price infinity and it returns the largest value
         # and takes the second largest only 
         if op == '<':
-            # print("this is first line: ", line)
-            #line = cur.prev()
             if line is None:
                 return None
             else:
                 test = cur.next()
                 if test is None and line[0] < data:
-                    # print(line[0], "= line[0] , data = ", data)
-                    # print("NONE")
-                    # line = cur.prev()
-                    # print("Line in the NONE case: ", line)
                     return line
                 elif test is None and line[0] == data:
                     line = decode(cur.prev())
@@ -60,7 +54,6 @@ class Database():
                     if line is None:
                         return None
                     line = decode(line)
-                    # print("Printing line again: ", line)
 
         if op == '<=':
             while True:
@@ -94,8 +87,7 @@ class Database():
                 self.results.append(set())
                 dbase.close()
                 return
-
-            # Handles all operators, after the previous while loop considering the ">" case
+            
             while eval("'%s' %s '%s'" % (line[0], op, date)):
                 aid, cat, loc = line[1].split(',')
 
@@ -190,7 +182,6 @@ class Database():
         for query in self.queries['price']:
             op, price = query.split()
             result = set()
-            # print(price)
             line = self._setCursor(cur, op, "{:>12}".format(price))
             if line is None:
                 self.results.append(set())
@@ -244,7 +235,6 @@ class Database():
                 upper = p
 
         result = set()
-        # print(lower, "and", upper)
         lop, lprice = lower.split()
         uop, uprice = upper.split()
         line = self._setCursor(cur, lop, "{:>12}".format(lprice))
@@ -252,11 +242,8 @@ class Database():
             self.results.append(set())
             dbase.close()
             return
-        # print(line[0].lstrip(), lop, lprice, uop, uprice)
-        # print(eval("%s %s %s" % (line[0].lstrip(), lop, lprice)))
-        # print(eval("%s %s %s" % (line[0].lstrip(), uop, uprice)))
+
         while eval("%s %s %s and %s %s %s" % (line[0].lstrip(), lop, lprice, line[0].lstrip(), uop, uprice)):
-            # print("Weeknd is famous ")
             aid, cat, loc = line[1].split(',')
 
             # Add the aid to result set if no location or catagory is specified,
@@ -463,7 +450,6 @@ class Database():
         result = self._adQuery(set.intersection(*self.results))
 
         if self.output:
-            # print(tabulate(result, headers=['Ad ID', 'Date', 'Location', 'Catagory', 'Title', 'Description', 'Price'], tablefmt="fancy_grid"))
             print(tabulate(result, headers=['Ad ID', 'Title', 'Description', 'Price', 'Catagory', 'Location', 'Date'], tablefmt="fancy_grid"))
             print("Number of Results = %d" % len(result))
         else:
