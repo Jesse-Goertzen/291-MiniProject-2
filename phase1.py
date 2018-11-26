@@ -72,7 +72,7 @@ def init(path):
 #         ads(inputs[i], "./output/ads" + mods[i] + ".txt")
 #         terms(inputs[i], "./output/terms" + mods[i] + ".txt")
 
-init('./10records.txt')
+init(sys.argv[1])
 
 # def main(argv):
 #     records = sys.argv[1]
