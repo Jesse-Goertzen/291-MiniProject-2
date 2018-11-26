@@ -39,7 +39,7 @@ class Database():
         # Extra condition for when its greater? Such as typing in price infinity and it returns the largest value
         # and takes the second largest only 
         if op == '<':
-            print("this is first line: ", line)
+            # print("this is first line: ", line)
             #line = cur.prev()
             if line is None:
                 return None
@@ -465,10 +465,10 @@ class Database():
         if self.output:
             # print(tabulate(result, headers=['Ad ID', 'Date', 'Location', 'Catagory', 'Title', 'Description', 'Price'], tablefmt="fancy_grid"))
             print(tabulate(result, headers=['Ad ID', 'Title', 'Description', 'Price', 'Catagory', 'Location', 'Date'], tablefmt="fancy_grid"))
-            # print("Number of Results = %d" % len(result))
+            print("Number of Results = %d" % len(result))
         else:
             print(tabulate(result, headers=['Ad ID', 'Title'], tablefmt="fancy_grid"))
-            # print("Number of Results = %d" % len(result))
+            print("Number of Results = %d" % len(result))
     
     # Set output type, returns the status of the update. e.g. 'False' if user doesnt enter brief or full, true otherwise
     def setOutput(self, flag):

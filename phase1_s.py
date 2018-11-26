@@ -13,6 +13,11 @@ def pdates(path, output="./output/pdate.txt"):
                     loc  = re.search("<loc>(.*)</loc>", l).group(1).lower()
                     d.write("%s:%s,%s,%s\n" % (date, aid, cat, loc))
 
+    with open(output, 'r+') as f:
+        lines = sorted(set(f.readlines()))
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
 
 # p:a,c,l
 def prices(path, output="./output/prices.txt"):
@@ -25,6 +30,13 @@ def prices(path, output="./output/prices.txt"):
                     cat   = re.search("<cat>(.*)</cat>", l).group(1).lower()
                     loc   = re.search("<loc>(.*)</loc>", l).group(1).lower()
                     d.write("%s:%s,%s,%s\n" % (price, aid, cat, loc))
+    
+    with open(output, 'r+') as f:
+        lines = sorted(set(f.readlines()), key=lambda line : int(line.split(':')[0]))
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
+
 
 # a:ad
 def ads(path, output="./output/ads.txt"):
@@ -35,6 +47,11 @@ def ads(path, output="./output/ads.txt"):
                     a = re.search("<aid>(.*)</aid>", l).group(1)
                     d.write("%s:%s" % (a, l))
 
+    with open(output, 'r+') as f:
+        lines = sorted(set(f.readlines()))
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
 
 def terms(path, output="./output/terms.txt"):
     with open(path, 'r') as f:
@@ -54,6 +71,11 @@ def terms(path, output="./output/terms.txt"):
                         if term is not None:
                             if len(term.group(1)) > 2:
                                 o.write(term.group(1) + ":" + aid + '\n')
+    with open(output, 'r+') as f:
+        lines = sorted(set(f.readlines()))
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
 
 
 # Now we can simply do: {from phase1 import init} then call to create all files based on the path to whatever records we're using
@@ -63,14 +85,14 @@ def init(path):
     prices(path)
     ads(path)
 
-# def tests():
-#     inputs = ["./10records.txt", "./1000records.txt"]
-#     mods = ["10", "1000"]
-#     for i in range(len(inputs)):
-#         pdates(inputs[i], "./output/pdate"  + mods[i] + ".txt")
-#         prices(inputs[i], "./output/prices" + mods[i] + ".txt")
-#         ads(inputs[i], "./output/ads" + mods[i] + ".txt")
-#         terms(inputs[i], "./output/terms" + mods[i] + ".txt")
+def tests():
+    inputs = ["./10records.txt", "./1000records.txt"]
+    mods = ["10", "1000"]
+    for i in range(len(inputs)):
+        pdates(inputs[i], "./output/pdate"  + mods[i] + ".txt")
+        prices(inputs[i], "./output/prices" + mods[i] + ".txt")
+        ads(inputs[i], "./output/ads" + mods[i] + ".txt")
+        terms(inputs[i], "./output/terms" + mods[i] + ".txt")
 
 init('./10records.txt')
 
