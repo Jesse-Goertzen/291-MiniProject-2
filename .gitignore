@@ -104,8 +104,8 @@ venv.bak/
 .mypy_cache/
 
 #projectstuff
-output/
-indexes/
+output/*
+indexes/*
 
 #vscodestuff
 mp2.code-workspace
